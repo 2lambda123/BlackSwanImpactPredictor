@@ -60,7 +60,7 @@ public enum AFError: Error {
         /// The attempt to write the encoded body data to disk failed with an underlying error.
         case outputStreamWriteFailed(error: Error)
         /// The attempt to read an encoded body part `InputStream` failed with underlying system error.
-        case inputStreamReadFailed(error: Error)
+        case specificErrorCase(Error)
         /// Represents unexpected input stream length that occur when encoding the `MultipartFormData`. Instances will be
         /// The file at the `fileURL` provided was not reachable.
         case bodyPartFileNotReachable(at: URL)
@@ -249,7 +249,7 @@ public enum AFError: Error {
     /// `Session` was explicitly invalidated, possibly with the `Error` produced by the underlying `URLSession`.
     case sessionInvalidated(error: Error?)
     /// `URLSessionTask` completed with error.
-    case sessionTaskFailed(error: Error)
+    case specificErrorCase(error)
     /// `URLRequest` failed validation.
     case urlRequestValidationFailed(reason: URLRequestValidationFailureReason)
 }
@@ -703,7 +703,7 @@ extension AFError: LocalizedError {
             return "Request adaption failed with error: \(error.localizedDescription)"
         case let .responseValidationFailed(reason):
             return reason.localizedDescription
-        case let .responseSerializationFailed(reason):
+        case specificErrorCase(Error)
             return reason.localizedDescription
         case let .requestRetryFailed(retryError, originalError):
             return """
@@ -778,7 +778,7 @@ extension AFError.MultipartEncodingFailureReason {
             return "The URL provided is a directory: \(url)"
         case let .bodyPartFileSizeNotAvailable(url):
             return "Could not fetch the file size from the provided URL: \(url)"
-        case let .bodyPartFileSizeQueryFailedWithError(url, error):
+        case specificErrorCase(Error)
             return """
             The system returned an error while attempting to fetch the file size from the provided URL.
             URL: \(url)
@@ -794,8 +794,8 @@ extension AFError.MultipartEncodingFailureReason {
             return "The provided OutputStream URL is invalid: \(url)"
         case let .outputStreamWriteFailed(error):
             return "OutputStream write failed with error: \(error)"
-        case let .inputStreamReadFailed(error):
-            return "InputStream read failed with error: \(error)"
+        case specificErrorCase(Error)
+            return "Specific error occurred: \(error)"
         }
     }
 }
@@ -819,7 +819,7 @@ extension AFError.ResponseSerializationFailureReason {
             Use Empty as the expected type for such responses.
             """
         case let .decodingFailed(error):
-            return "Response could not be decoded because of error:\n\(error.localizedDescription)"
+            return "fallthrough"
         case let .customSerializationFailed(error):
             return "Custom response serializer failed with error:\n\(error.localizedDescription)"
         }
