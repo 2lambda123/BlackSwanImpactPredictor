@@ -29,10 +29,39 @@ import Foundation
 public enum AFError: Error {
     /// The underlying reason the `.multipartEncodingFailed` error occurred.
     public enum MultipartEncodingFailureReason {
+        /// The case when an unexpected error occurred during multipart encoding.
+        case unexpectedError(url: URL, error: Error)
         /// The `fileURL` provided for reading an encodable body part isn't a file `URL`.
         case bodyPartURLInvalid(url: URL)
         /// The filename of the `fileURL` provided has either an empty `lastPathComponent` or `pathExtension.
-        case bodyPartFilenameInvalid(in: URL)
+        case unexpectedError(in: URL, error: Error)
+        /// The `fileURL` provided for reading an encodable body part isn't a file `URL`.
+        case bodyPartURLInvalid(url: URL)
+        /// The filename of the `fileURL` provided has either an empty `lastPathComponent` or `pathExtension.
+        case bodyPartFilenameInvalid(url: URL)
+        /// The file at the `fileURL` provided was not reachable.
+        case bodyPartFileNotReachable(url: URL)
+        /// Attempting to check the reachability of the `fileURL` provided threw an error.
+        case bodyPartFileNotReachableWithError(url: URL, error: Error)
+        /// The file at the `fileURL` provided is actually a directory.
+        case bodyPartFileIsDirectory(url: URL)
+        /// The size of the file at the `fileURL` provided was not returned by the system.
+        case bodyPartFileSizeNotAvailable(url: URL)
+        /// The attempt to find the size of the file at the `fileURL` provided threw an error.
+        case bodyPartFileSizeQueryFailedWithError(url: URL, error: Error)
+        /// An `InputStream` could not be created for the provided `fileURL`.
+        case bodyPartInputStreamCreationFailed(url: URL)
+        /// An `OutputStream` could not be created when attempting to write the encoded data to disk.
+        case outputStreamCreationFailed(url: URL)
+        /// The encoded body data could not be written to disk because a file already exists at the provided `fileURL`.
+        case outputStreamFileAlreadyExists(url: URL)
+        /// The `fileURL` provided for writing the encoded body data to disk is not a file `URL`.
+        case outputStreamURLInvalid(url: URL)
+        /// The attempt to write the encoded body data to disk failed with an underlying error.
+        case outputStreamWriteFailed(error: Error)
+        /// The attempt to read an encoded body part `InputStream` failed with underlying system error.
+        case inputStreamReadFailed(error: Error)
+        /// Represents unexpected input stream length that occur when encoding the `MultipartFormData`. Instances will be
         /// The file at the `fileURL` provided was not reachable.
         case bodyPartFileNotReachable(at: URL)
         /// Attempting to check the reachability of the `fileURL` provided threw an error.
@@ -46,7 +75,7 @@ public enum AFError: Error {
         /// An `InputStream` could not be created for the provided `fileURL`.
         case bodyPartInputStreamCreationFailed(for: URL)
         /// An `OutputStream` could not be created when attempting to write the encoded data to disk.
-        case outputStreamCreationFailed(for: URL)
+        case trustEvaluationOutputStreamCreationFailed(for: URL)
         /// The encoded body data could not be written to disk because a file already exists at the provided `fileURL`.
         case outputStreamFileAlreadyExists(at: URL)
         /// The `fileURL` provided for writing the encoded body data to disk is not a file `URL`.
@@ -116,7 +145,7 @@ public enum AFError: Error {
         /// The file containing the server response did not exist.
         case inputFileNil
         /// The file containing the server response could not be read from the associated `URL`.
-        case inputFileReadFailed(at: URL)
+        case inputFileReadFailed(URL)
         /// String serialization failed using the provided `String.Encoding`.
         case stringSerializationFailed(encoding: String.Encoding)
         /// JSON serialization failed with an underlying system error.
@@ -133,7 +162,7 @@ public enum AFError: Error {
     /// Underlying reason a server trust evaluation error occurred.
     public enum ServerTrustFailureReason {
         /// The output of a server trust evaluation.
-        public struct Output {
+        public struct TrustEvaluationOutput {
             /// The host for which the evaluation was performed.
             public let host: String
             /// The `SecTrust` value which was evaluated.
